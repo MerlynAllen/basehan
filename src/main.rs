@@ -15,19 +15,19 @@ pub mod base_han {
             while bit_pointer >= 13 {
                 bit_pointer -= 13;
                 let index = (buff >> bit_pointer) & 0x1FFF;
-                result.push(char::from_u32(index + BASE_OFFSET).unwrap());
+                result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
             }
         }
         match bit_pointer {
             0 => (),
             1..=8 => {
                 let index = buff & (0xFFFFFFFF >> (32 - bit_pointer));
-                result.push(char::from_u32(index + BASE_OFFSET).unwrap());
+                result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
             }
             9..=12 => {
                 let index = buff & (0xFFFFFFFF >> (32 - bit_pointer));
-                result.push(char::from_u32(index + BASE_OFFSET).unwrap());
-                result.push(char::from_u32(MULTIBYTE_SIGN).unwrap());
+                result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
+                result.push(char::from_u32(MULTIBYTE_SIGN).expect("Internal bug. Invalid multibyte sign."));
             }
             _ => unreachable!(),
         }
@@ -71,89 +71,89 @@ pub mod base_han {
         result
     }
 
-    pub struct BaseHanEncoder {
-        buff: u32,
-        nbits: u32,
-    }
-    impl BaseHanEncoder {
-        pub fn new() -> Self {
-            Self { buff: 0, nbits: 0 }
-        }
-        pub fn update(mut self, buff: Vec<u8>) -> Vec<char> {
-            let mut result = Vec::new();
-            for i in 0..buff.len() {
-                self.buff = self.buff << 8 | buff[i] as u32;
-                self.nbits += 8;
-                while self.nbits >= 13 {
-                    self.nbits -= 13;
-                    let index = (self.buff >> self.nbits) & 0x1FFF;
-                    result.push(char::from_u32(index + BASE_OFFSET).unwrap());
-                }
-            }
-            result
-        }
-        pub fn finish(self) -> Vec<char> {
-            let mut result = Vec::new();
-            match self.nbits {
-                0 => (),
-                1..=8 => {
-                    let index = self.buff & (0xFFFFFFFF >> (32 - self.nbits));
-                    result.push(char::from_u32(index + BASE_OFFSET).unwrap());
-                }
-                9..=12 => {
-                    let index = self.buff & (0xFFFFFFFF >> (32 - self.nbits));
-                    result.push(char::from_u32(index + BASE_OFFSET).unwrap());
-                    result.push(char::from_u32(MULTIBYTE_SIGN).unwrap());
-                }
-                _ => unreachable!(),
-            }
-            result
-        }
-    }
-
-    pub struct BaseHanDecoder {
-        buff: u32,
-        nbits: u32,
-    }
-    impl BaseHanDecoder {
-        pub fn new() -> Self {
-            Self { buff: 0, nbits: 0 }
-        }
-        pub fn update(mut self, buff: Vec<char>) -> Vec<u8> {
-            let mut result = Vec::new();
-            for i in 0..buff.len() {
-                let index = buff[i] as u32 - BASE_OFFSET;
-                self.buff = (self.buff << 13) | (index & 0x1FFF);
-                self.nbits += 13;
-                while self.nbits >= 8 {
-                    self.nbits -= 8;
-                    let byte = (self.buff >> self.nbits) & 0xFF;
-                    result.push(byte as u8);
-                }
-            }
-            result
-        }
-        pub fn finish(mut self, buff: Vec<char>) -> Vec<u8> {
-            let mut result = Vec::new();
-            // last byte(s)
-            let tail_bits = (8 * if buff[buff.len() - 1] as u32 == MULTIBYTE_SIGN {
-                2
-            } else {
-                1
-            }) - self.nbits;
-
-            let index = buff[buff.len() - 1] as u32 - BASE_OFFSET;
-            self.buff = (self.buff << tail_bits) | (index & (0xFFFFFFFF >> (32 - tail_bits)));
-            // assert!((bit_pointer + tail_bits) % 8 == 0);
-            if buff[buff.len() - 1] as u32 == MULTIBYTE_SIGN {
-                let byte = (self.buff >> 8) & 0xFF;
-                result.push(byte as u8);
-            }
-            let byte = self.buff & 0xFF;
-            result.push(byte as u8);
-            result
-        }
-    }
+//     pub struct BaseHanEncoder {
+//         buff: u32,
+//         nbits: u32,
+//     }
+//     impl BaseHanEncoder {
+//         pub fn new() -> Self {
+//             Self { buff: 0, nbits: 0 }
+//         }
+//         pub fn update(mut self, buff: Vec<u8>) -> Vec<char> {
+//             let mut result = Vec::new();
+//             for i in 0..buff.len() {
+//                 self.buff = self.buff << 8 | buff[i] as u32;
+//                 self.nbits += 8;
+//                 while self.nbits >= 13 {
+//                     self.nbits -= 13;
+//                     let index = (self.buff >> self.nbits) & 0x1FFF;
+//                     result.push(char::from_u32(index + BASE_OFFSET).unwrap());
+//                 }
+//             }
+//             result
+//         }
+//         pub fn finish(self) -> Vec<char> {
+//             let mut result = Vec::new();
+//             match self.nbits {
+//                 0 => (),
+//                 1..=8 => {
+//                     let index = self.buff & (0xFFFFFFFF >> (32 - self.nbits));
+//                     result.push(char::from_u32(index + BASE_OFFSET).unwrap());
+//                 }
+//                 9..=12 => {
+//                     let index = self.buff & (0xFFFFFFFF >> (32 - self.nbits));
+//                     result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bugs "));
+//                     result.push(char::from_u32(MULTIBYTE_SIGN).unwrap());
+//                 }
+//                 _ => unreachable!(),
+//             }
+//             result
+//         }
+//     }
+//
+//     pub struct BaseHanDecoder {
+//         buff: u32,
+//         nbits: u32,
+//     }
+//     impl BaseHanDecoder {
+//         pub fn new() -> Self {
+//             Self { buff: 0, nbits: 0 }
+//         }
+//         pub fn update(mut self, buff: Vec<char>) -> Vec<u8> {
+//             let mut result = Vec::new();
+//             for i in 0..buff.len() {
+//                 let index = buff[i] as u32 - BASE_OFFSET;
+//                 self.buff = (self.buff << 13) | (index & 0x1FFF);
+//                 self.nbits += 13;
+//                 while self.nbits >= 8 {
+//                     self.nbits -= 8;
+//                     let byte = (self.buff >> self.nbits) & 0xFF;
+//                     result.push(byte as u8);
+//                 }
+//             }
+//             result
+//         }
+//         pub fn finish(mut self, buff: Vec<char>) -> Vec<u8> {
+//             let mut result = Vec::new();
+//             // last byte(s)
+//             let tail_bits = (8 * if buff[buff.len() - 1] as u32 == MULTIBYTE_SIGN {
+//                 2
+//             } else {
+//                 1
+//             }) - self.nbits;
+//
+//             let index = buff[buff.len() - 1] as u32 - BASE_OFFSET;
+//             self.buff = (self.buff << tail_bits) | (index & (0xFFFFFFFF >> (32 - tail_bits)));
+//             // assert!((bit_pointer + tail_bits) % 8 == 0);
+//             if buff[buff.len() - 1] as u32 == MULTIBYTE_SIGN {
+//                 let byte = (self.buff >> 8) & 0xFF;
+//                 result.push(byte as u8);
+//             }
+//             let byte = self.buff & 0xFF;
+//             result.push(byte as u8);
+//             result
+//         }
+//     }
 }
 
 use clap::Parser;
@@ -173,16 +173,18 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let mut buffer = String::new();
-    io::stdin().read_to_string(&mut buffer).unwrap();
+    let mut buffer = Vec::new();
+    io::stdin().read_to_end(&mut buffer).expect("Failed to read from stdin.");
     if args.decode {
+        // check is string
+        let buffer = String::from_utf8(buffer).expect("Invalid input. Expected UTF-8 string for decoding.");
         let result = base_han::decode(buffer);
-        let result = String::from_utf8(result).unwrap().to_string();
-        io::stdout().write_all(result.as_bytes()).unwrap();
+        let result = String::from_utf8(result).expect("Internal bugs occurred when decoding.").to_string();
+        io::stdout().write_all(result.as_bytes()).expect("Failed to write to stdout.");
     } else {
-        let result = base_han::encode(buffer.as_bytes().to_vec());
+        let result = base_han::encode(buffer);
         io::stdout()
             .write_all(result.iter().collect::<String>().as_bytes())
-            .unwrap();
+            .expect("Failed to write to stdout.");
     }
 }
