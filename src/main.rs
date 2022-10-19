@@ -179,8 +179,8 @@ fn main() {
         // check is string
         let buffer = String::from_utf8(buffer).expect("Invalid input. Expected UTF-8 string for decoding.");
         let result = base_han::decode(buffer);
-        let result = String::from_utf8(result).expect("Internal bugs occurred when decoding.").to_string();
-        io::stdout().write_all(result.as_bytes()).expect("Failed to write to stdout.");
+        // let result = String::from_utf8(result).expect("Internal bugs occurred when decoding.").to_string();
+        io::stdout().write_all(&result).expect("Failed to write to stdout.");
     } else {
         let result = base_han::encode(buffer);
         io::stdout()
