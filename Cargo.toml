@@ -1,7 +1,16 @@
 [package]
-name = "base-han"
-version = "0.1.0"
+name = "basehan"
+description = "A data encryption method using Chinese characters. Kind of like base64."
+version = "0.1.1"
 edition = "2021"
+license = "MIT"
+license-file = "LICENCE"
+readme = "README.md"
+homepage = "https://github.com/MerlynAllen/basehan"
+repository = "https://github.com/MerlynAllen/basehan"
+keywords = ["data encoding", "base64", "chinese", "chinese characters"]
+exclude = [".vscode", ".idea", "release", "target"]
+categories = ["encoding"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -14,8 +14,8 @@ dependencies = [
 ]
 
 [[package]]
-name = "base-han"
-version = "0.1.0"
+name = "basehan"
+version = "0.1.1"
 dependencies = [
  "clap",
 ]
