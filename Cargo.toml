@@ -8,7 +8,7 @@ license-file = "LICENCE"
 readme = "README.md"
 homepage = "https://github.com/MerlynAllen/basehan"
 repository = "https://github.com/MerlynAllen/basehan"
-keywords = ["data encoding", "base64", "chinese", "chinese characters"]
+keywords = ["encoding", "base64", "chinese", "chinese_characters"]
 exclude = [".vscode", ".idea", "release", "target"]
 categories = ["encoding"]
 
