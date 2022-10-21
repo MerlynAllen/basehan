@@ -1,8 +1,15 @@
+const BASE_OFFSET: u32 = 0x4e00;
+const CODE_RANGE: u32 = 0x1FFF;
+const MULTIBYTE_SIGN: u32 = 0x8e00;
 
-pub const BASE_OFFSET: u32 = 0x4e00;
-pub const MULTIBYTE_SIGN: u32 = 0x8e00;
+#[derive(Debug)]
+pub enum BaseHanError {
+    InternalError(String),
+    InvalidCode(u32),
+}
 
-pub fn encode(raw: Vec<u8>) -> String {
+pub fn encode<T: AsRef<[u8]>>(raw: T) -> Result<String, BaseHanError> { // All errors in this function are internal errors, should never happen
+    let raw = raw.as_ref();
     let mut result = Vec::new();
     let mut buff = 0u32;
     let mut bit_pointer = 0;
@@ -13,29 +20,59 @@ pub fn encode(raw: Vec<u8>) -> String {
         while bit_pointer >= 13 {
             bit_pointer -= 13;
             let index = (buff >> bit_pointer) & 0x1FFF;
-            result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
+            let code = char::from_u32(index + BASE_OFFSET);
+            if code.is_none() {
+                return Err(BaseHanError::InternalError(format!(
+                    "Invalid code point: {}",
+                    index
+                )));
+            }
+            result.push(code.unwrap());
         }
     }
     match bit_pointer {
         0 => (),
         1..=8 => {
             let index = buff & (0xFFFFFFFF >> (32 - bit_pointer));
-            result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
+            let code = char::from_u32(index + BASE_OFFSET);
+            if code.is_none() {
+                return Err(BaseHanError::InternalError(format!(
+                    "Invalid code point: {}",
+                    index
+                )));
+            }
+            result.push(code.unwrap());
         }
         9..=12 => {
             let index = buff & (0xFFFFFFFF >> (32 - bit_pointer));
-            result.push(char::from_u32(index + BASE_OFFSET).expect("Internal bug. Invalid char."));
-            result.push(
-                char::from_u32(MULTIBYTE_SIGN).expect("Internal bug. Invalid multibyte sign."),
-            );
+            let code = char::from_u32(index + BASE_OFFSET);
+            if code.is_none() {
+                return Err(BaseHanError::InternalError(format!(
+                    "Invalid code point: {}",
+                    index
+                )));
+            }
+            result.push(code.unwrap());
+            result.push(char::from_u32(MULTIBYTE_SIGN).unwrap());
         }
         _ => unreachable!(),
     }
-    result.iter().collect()
+    Ok(result.iter().collect())
 }
-pub fn decode(basehan: String) -> Vec<u8> {
+pub fn decode(basehan: String) -> Result<Vec<u8>, BaseHanError> {
     // check multi bytes tail
-    let mut basehan: Vec<char> = basehan.chars().collect();
+    let mut is_invalid = false;
+    let mut err_code = 0;
+    let mut basehan: Vec<char> = basehan.chars().map(|c|{
+        if (c as u32 - BASE_OFFSET>= CODE_RANGE) && (c as u32 != MULTIBYTE_SIGN) {
+            is_invalid = true;
+            err_code = c as u32;
+        }
+        c
+    }).collect();
+    if is_invalid {
+        return Err(BaseHanError::InvalidCode(err_code));
+    }
     let is_multibyte_tail = basehan[basehan.len() - 1] as u32 == MULTIBYTE_SIGN;
     if is_multibyte_tail {
         basehan.pop();
@@ -68,7 +105,7 @@ pub fn decode(basehan: String) -> Vec<u8> {
     }
     let byte = buff & 0xFF;
     result.push(byte as u8);
-    result
+    Ok(result)
 }
 //     pub struct BaseHanEncoder {
 //         buff: u32,
