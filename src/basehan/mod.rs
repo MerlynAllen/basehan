@@ -2,7 +2,7 @@
 pub const BASE_OFFSET: u32 = 0x4e00;
 pub const MULTIBYTE_SIGN: u32 = 0x8e00;
 
-pub fn encode(raw: Vec<u8>) -> Vec<char> {
+pub fn encode(raw: Vec<u8>) -> String {
     let mut result = Vec::new();
     let mut buff = 0u32;
     let mut bit_pointer = 0;
@@ -31,7 +31,7 @@ pub fn encode(raw: Vec<u8>) -> Vec<char> {
         }
         _ => unreachable!(),
     }
-    result
+    result.iter().collect()
 }
 pub fn decode(basehan: String) -> Vec<u8> {
     // check multi bytes tail
