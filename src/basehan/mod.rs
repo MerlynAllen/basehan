@@ -59,7 +59,7 @@ pub fn encode<T: AsRef<[u8]>>(raw: T) -> Result<String, BaseHanError> { // All e
     }
     Ok(result.iter().collect())
 }
-pub fn decode(basehan: String) -> Result<Vec<u8>, BaseHanError> {
+pub fn decode(basehan: &String) -> Result<Vec<u8>, BaseHanError> {
     // check multi bytes tail
     let mut is_invalid = false;
     let mut err_code = 0;
@@ -106,6 +106,20 @@ pub fn decode(basehan: String) -> Result<Vec<u8>, BaseHanError> {
     let byte = buff & 0xFF;
     result.push(byte as u8);
     Ok(result)
+}
+
+pub trait BaseHan {
+    fn encode(&self) -> Result<String, BaseHanError>;
+    fn decode(&self) -> Result<Vec<u8>, BaseHanError>;
+}
+
+impl BaseHan for String {
+    fn encode(&self) -> Result<String, BaseHanError> {
+        encode(self)
+    }
+    fn decode(&self) -> Result<Vec<u8>, BaseHanError> {
+        decode(self)
+    }
 }
 //     pub struct BaseHanEncoder {
 //         buff: u32,
