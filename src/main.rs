@@ -48,8 +48,8 @@ fn interactive_shell(decode: bool) {
                 Err(err) => println!("Error: Please input a valid BaseHan cipher.{:?}", err),
             }
         }
-        println!("Exit");
     }
+    println!("Exit");
 }
 
 fn main() {
