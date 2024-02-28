@@ -1,5 +1,5 @@
 use clap::Parser;
-use std::io::{self, stdin, Read, Stdin, Write};
+use std::io::{self, stdin, Read, Write};
 
 // Base-Han is a command line tool to encode/decode binary data to/from Base-Han.
 #[derive(Debug, Parser)]
@@ -67,17 +67,21 @@ fn main() {
         // check is string
         let buffer =
             String::from_utf8(buffer).expect("Invalid input. Expected UTF-8 string for decoding.");
-        let result = basehan::decode(&buffer)
+        let mut result = basehan::decode(&buffer)
             .map_err(|e| format!("Failed to decode: {:?}", e))
             .unwrap();
         // let result = String::from_utf8(result).expect("Internal bugs occurred when decoding.").to_string();
+        result.push('\n' as u8);
         io::stdout()
             .write_all(&result)
             .expect("Failed to write to stdout.");
+        
     } else {
-        let result = basehan::encode(buffer).expect("Internal bugs occurred when encoding.");
+        let mut result = basehan::encode(buffer).expect("Internal bugs occurred when encoding.");
+        result.push('\n');
         io::stdout()
             .write_all(result.as_bytes())
             .expect("Failed to write to stdout.");
     }
+    io::stdout().flush().expect("Failed to flush stdout.");
 }
