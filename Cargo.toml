@@ -1,9 +1,10 @@
 [package]
 name = "basehan"
 description = "A data encryption method using Chinese characters. Kind of like base64."
-version = "0.2.0"
+version = "0.1.4"
 edition = "2021"
 license = "MIT"
+license-file = "LICENCE"
 readme = "README.md"
 homepage = "https://github.com/MerlynAllen/basehan"
 repository = "https://github.com/MerlynAllen/basehan"
