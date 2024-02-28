@@ -48,8 +48,8 @@ fn interactive_shell(decode: bool) {
                 Err(err) => println!("Error: Please input a valid BaseHan cipher.{:?}", err),
             }
         }
-        println!("Exit");
     }
+    println!("Exit");
 }
 
 fn main() {
@@ -75,7 +75,6 @@ fn main() {
         io::stdout()
             .write_all(&result)
             .expect("Failed to write to stdout.");
-        
     } else {
         let mut result = basehan::encode(buffer).expect("Internal bugs occurred when encoding.");
         result.push('\n');
