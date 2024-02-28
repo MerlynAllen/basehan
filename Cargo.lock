@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "basehan"
-version = "0.1.4"
+version = "0.2.1"
 dependencies = [
  "clap",
 ]
