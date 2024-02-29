@@ -5,10 +5,11 @@ const MULTIBYTE_SIGN: u32 = 0x8e00;
 #[derive(Debug)]
 pub enum BaseHanError {
     InternalError(String),
-    InvalidCode(u32),
+    InvalidCode(u32, usize),
 }
 
-pub fn encode<T: AsRef<[u8]>>(raw: T) -> Result<String, BaseHanError> { // All errors in this function are internal errors, should never happen
+pub fn encode<T: AsRef<[u8]>>(raw: T) -> Result<String, BaseHanError> {
+    // All errors in this function are internal errors, should never happen
     let raw = raw.as_ref();
     let mut result = Vec::new();
     let mut buff = 0u32;
@@ -63,16 +64,13 @@ pub fn decode(basehan: &String) -> Result<Vec<u8>, BaseHanError> {
     // check multi bytes tail
     let mut is_invalid = false;
     let mut err_code = 0;
-    let mut basehan: Vec<char> = basehan.chars().map(|c|{
-        if (c as u32 - BASE_OFFSET>= CODE_RANGE) && (c as u32 != MULTIBYTE_SIGN) {
-            is_invalid = true;
-            err_code = c as u32;
+    // check whether c is avaliable one by one
+    for (i, c) in basehan.chars().into_iter().enumerate() {
+        if ((c as u32) < BASE_OFFSET) || ((c as u32) > BASE_OFFSET + CODE_RANGE) {
+            return Err(BaseHanError::InvalidCode(c as u32, i));
         }
-        c
-    }).collect();
-    if is_invalid {
-        return Err(BaseHanError::InvalidCode(err_code));
     }
+    let mut basehan = basehan.chars().collect::<Vec<char>>();
     let is_multibyte_tail = basehan[basehan.len() - 1] as u32 == MULTIBYTE_SIGN;
     if is_multibyte_tail {
         basehan.pop();
